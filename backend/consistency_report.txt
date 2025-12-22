@@ -1,0 +1,13 @@
+--- Starting Consistency Check (HTTP) ---
+
+[Iteration 1] Creating Session...
+❌ Exception: All connection attempts failed
+
+[Iteration 2] Creating Session...
+❌ Exception: All connection attempts failed
+
+[Iteration 3] Creating Session...
+❌ Exception: All connection attempts failed
+
+--- Summary ---
+❌ FAILED: Found 0 unique responses.
