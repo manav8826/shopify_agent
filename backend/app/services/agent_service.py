@@ -233,6 +233,25 @@ New input: {message}
                                 # --- SPECIAL HANDLING: Shopify Data (Ghost Data Pattern) ---
                                 if action == "get_shopify_data" and isinstance(observation, (list, dict)):
                                     # 1. Inject into shared locals for this request
+                                    # Pre-process: Cast numeric fields to float to avoid string concatenation in Pandas
+                                    if isinstance(observation, list):
+                                        for item in observation:
+                                            if isinstance(item, dict):
+                                                for field in ['total_price', 'subtotal_price', 'total_tax']:
+                                                    if field in item and item[field] is not None:
+                                                        try:
+                                                            item[field] = float(item[field])
+                                                        except (ValueError, TypeError):
+                                                            pass 
+                                                
+                                                # Pre-clean billing_address to ensure safe city extraction
+                                                if 'billing_address' not in item or item['billing_address'] is None:
+                                                    item['billing_address'] = {'city': 'Unknown', 'country': 'Unknown'}
+                                                
+                                                # Pre-clean customer to ensure safe name extraction
+                                                if 'customer' not in item or item['customer'] is None:
+                                                    item['customer'] = {'first_name': 'Unknown', 'last_name': '', 'id': 'Unknown'}
+                                                            
                                     repl_locals["shopify_data"] = observation
                                     repl_locals["orders_data"] = observation # Backwards compatibility
                                     

@@ -1,0 +1,46 @@
+{
+  "test_date": "2025-12-21T00:00:00",
+  "test_1_orders_last_7_days": {
+    "count": 0,
+    "revenue": "$0.00",
+    "aov": "$0.00"
+  },
+  "test_2_top_products": [
+    {
+      "name": "Bluetooth Speaker",
+      "quantity": 84,
+      "revenue": "$3894.75"
+    },
+    {
+      "name": "Laptop Stand",
+      "quantity": 55,
+      "revenue": "$3721.72"
+    },
+    {
+      "name": "Noise Cancelling Headphones",
+      "quantity": 64,
+      "revenue": "$3660.05"
+    },
+    {
+      "name": "Wireless Mouse",
+      "quantity": 70,
+      "revenue": "$2971.11"
+    },
+    {
+      "name": "USB-C Charger",
+      "quantity": 69,
+      "revenue": "$2968.67"
+    }
+  ],
+  "test_3_revenue_by_city": {
+    "Unknown": "$23520.54",
+    "Toronto": "$5143.48",
+    "Ottawa": "$774.97"
+  },
+  "test_4_repeat_customers": 1,
+  "test_5_aov": "$247.39",
+  "test_6_total_products": 22,
+  "test_8_total_revenue": "$29438.99",
+  "test_9_december_orders": 0,
+  "test_10_top_city": "Unknown: $23520.54"
+}

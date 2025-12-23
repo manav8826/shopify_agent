@@ -83,7 +83,12 @@ class ShopifyClient:
         
         # Ensure limit is set
         if 'limit' not in current_params:
-            current_params['limit'] = 50
+            current_params['limit'] = 250
+            
+        # FORCE 'status=any' for orders to capture Open, Closed, and Cancelled
+        if resource == 'orders' and 'status' not in current_params:
+            logger.info("Enforcing status='any' for orders to fetch correct revenue.")
+            current_params['status'] = 'any'
 
         while current_url and page_count < max_pages:
             page_count += 1
@@ -116,13 +121,19 @@ class ShopifyClient:
                             # Format: <https://...>; rel="next"
                             next_link = link.split(';')[0].strip('<> ')
                             break
-                            
+                
+                if next_link:
+                    logger.info(f"DEBUG: Found next page link: {next_link}")
+                else:
+                    logger.info("DEBUG: No next page link found.")
+                    
                 current_url = next_link
                 
                 if not current_url:
                     break
                     
             except httpx.HTTPStatusError as e:
+                # ... existing error handling ...
                 if e.response.status_code == 429:
                     raise ShopifyRateLimitError(f"Rate limit exceeded after max retries: {e}")
                 raise ShopifyError(f"Shopify API Error: {e}")
@@ -130,4 +141,12 @@ class ShopifyClient:
                 logger.error(f"Failed to fetch page {page_count} of {resource}: {e}")
                 raise
 
+        # Deduplicate results by ID to prevent overlap/duplicates
+        logger.info(f"DEBUG: Pre-dedup count: {len(all_results)}")
+        if all_results and 'id' in all_results[0]:
+            unique_results = {str(item['id']): item for item in all_results}
+            deduped_list = list(unique_results.values())
+            logger.info(f"DEBUG: Fetched {len(all_results)} raw records. Deduped to: {len(deduped_list)} unique records.")
+            return deduped_list
+            
         return all_results

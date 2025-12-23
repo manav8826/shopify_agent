@@ -12,10 +12,10 @@ class GetShopifyDataInput(BaseModel):
         description="The resource to fetch. Must be one of: 'orders', 'products', 'customers'."
     )
     limit: int = Field(
-        50, 
+        250, 
         ge=1, 
         le=250, 
-        description="Number of results to return per page. Max 250."
+        description="Number of results to return per page. Max 250. Default 250 for maximum data context."
     )
     filters: Optional[Dict[str, Any]] = Field(
         None, 

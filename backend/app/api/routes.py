@@ -61,20 +61,27 @@ async def list_sessions():
     """List all sessions ordered by last active"""
     # Logic moved to route handler for direct DB access
     from app.db.database import SessionLocal
-    from app.models.database_models import Session
+    from app.models.database_models import Session, Message as DBMessage
     
     db = SessionLocal()
     try:
         sessions = db.query(Session).order_by(Session.last_active.desc()).all()
-        return [
-            {
+        result = []
+        for s in sessions:
+            # Fetch first user message for preview
+            first_msg = db.query(DBMessage).filter(DBMessage.session_id == s.id, DBMessage.role == "user").order_by(DBMessage.timestamp).first()
+            preview_text = first_msg.content if first_msg else "New Analysis"
+            if len(preview_text) > 40:
+                preview_text = preview_text[:37] + "..."
+                
+            result.append({
                 "id": s.id,
                 "store_url": s.store_url,
                 "created_at": s.created_at,
-                "last_active": s.last_active
-            }
-            for s in sessions
-        ]
+                "last_active": s.last_active,
+                "preview": preview_text
+            })
+        return result
     finally:
         db.close()
 
