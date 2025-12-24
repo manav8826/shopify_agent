@@ -54,7 +54,14 @@ const ChatInterface: React.FC = () => {
             setMessages(uiMessages);
         } catch (err) {
             console.error("Failed to load history", err);
-            toast.error("Failed to load history");
+            // If session is not found (404), it likely was wiped from the server (ephemeral DB)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((err as any).message?.includes('404')) {
+                toast.error("Session expired. Starting new chat.");
+                handleNewChat();
+            } else {
+                toast.error("Failed to load history");
+            }
         }
     };
 
