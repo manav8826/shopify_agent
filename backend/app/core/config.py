@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     SHOPIFY_API_VERSION: str = "2025-07"
     
     # Gemini Configuration
-    GEMINI_API_KEY: str
+    GEMINI_API_KEY: str | None = None
     
     # Groq Configuration
     GROQ_API_KEY: str
