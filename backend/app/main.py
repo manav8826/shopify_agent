@@ -2,6 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.routes import router as api_router
+from app.db.database import engine, Base
+# Import models to ensure they are registered with Base
+from app.models import database_models 
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Shopify Analyst Agent API",
