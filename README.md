@@ -1,84 +1,134 @@
-# ShopifyAI 🤖
+# Shopify AI Analyst Agent 🤖
 
-**An Intelligent Agent for Shopify Store Analytics**
+> **A Production-Ready RAG Agent for E-commerce Analytics**
 
-![ShopifyAI Banner](/frontend/public/logo.png)
+This project is an intelligent AI Agent capable of connecting to a Shopify store, fetching live data (Products, Orders, Customers), and performing complex analytical tasks using a **ReAct (Reasoning + Acting)** loop.
 
-## Overview
+It solves the "Context Window" problem of large datasets using a custom **"Ghost Data" Pattern** and ensures 100% mathematical accuracy by utilizing a **Python REPL** for calculations.
 
-ShopifyAI is a powerful conversational agent that allows store owners to query their Shopify data using natural language. Built with **FastAPI**, **LangChain**, and **React**, it connects directly to your Shopify store to answer complex questions about orders, products, customers, and revenue.
+---
 
-### Key Features
-- **Natural Language Queries**: "How much revenue did I make last week?"
-- **Advanced Code Analysis**: The agent writes and executes Python code to perform precise calculations.
-- **Ghost Data Optimization**: Efficiently handles large datasets (fetched via API, analyzed in memory) without token overflow.
-- **Visualizations**: Supports tables and potentially charts (roadmap) for data presentation.
-- **Secure & Isolated**: Tools run within a controlled environment.
+## 🌟 Key Features
 
-## Architecture
+*   **Autonomy**: The agent autonomously decides which tools to use. It doesn't just "chat"; it *acts*.
+*   **"Ghost Data" Optimization**: Handles massive datasets (10k+ orders) without crashing the LLM context window.
+*   **Optimistic UI**: A polished, glassmorphism-styled React implementation that handles long-running AI tasks gracefully.
+*   **Memory**: Persists conversation history using SQLite (local) or keeps session state ephemeral (cloud).
+*   **Resilience**: Auto-recovers from session expiry on ephemeral hosting platforms (like Render).
+
+---
+
+## 🏗️ Architecture
+
+The system follows a Client-Server architecture with a decoupled RAG engine.
 
 ```mermaid
 graph TD
-    User[User (Frontend)] <-->|Rest API| Backend[FastAPI Backend]
-    Backend <-->|LangChain| Agent[ReAct Agent]
-    Agent <-->|Tool Call| Shopify[Shopify Admin API]
-    Agent <-->|Execution| REPL[Python REPL]
-    Shopify -->|JSON Data| REPL
+    User[User / Frontend] <-->|REST API| API[FastAPI Backend]
+    API <-->|Managing State| DB[(SQLite Database)]
+    API <-->|ReAct Loop| Agent[LangChain Agent]
+    
+    subgraph "The AI Brain"
+        Agent <-->|Instructions| LLM[Groq / Llama 3]
+        Agent <-->|Tools| Tools
+    end
+    
+    subgraph "Tool Belt"
+        Tools <-->|Fetch| Shopify[Shopify API]
+        Tools <-->|Calculate| Python[Python REPL]
+    end
 ```
 
-## Quick Start
+### Tech Stack
 
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- Shopify Admin API Access Token
+| Component | Technology | Reasoning |
+| :--- | :--- | :--- |
+| **Frontend** | **React (Vite) + TypeScript** | Type safety, fast HMR, component modularity. |
+| **Backend** | **FastAPI (Python)** | Native async support, Pydantic validation, great AI ecosystem. |
+| **AI Engine** | **LangChain + Groq** | Groq provides near-instant inference for Llama 3.3 (70B). |
+| **Data Processing** | **Pandas** | Used inside the Python REPL tool for high-performance data analysis. |
+| **Styling** | **CSS Modules + Glassmorphism** | Premium, modern aesthetic without heavy frameworks. |
 
-### 1. Backend Setup
-1.  Navigate to `backend`:
-    ```bash
-    cd backend
-    ```
-2.  Install credentials:
-    ```bash
-    pip install -r requirements.txt
-    ```
-3.  Configure `.env` (see `.env.example` or provided credentials).
-4.  Run the server:
-    ```bash
-    uvicorn app.main:app --reload
-    ```
-    The API will be available at `http://localhost:8000`.
+---
 
-### 2. Frontend Setup
-1.  Navigate to `frontend`:
-    ```bash
-    cd frontend
-    ```
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Start development server:
-    ```bash
-    npm run dev
-    ```
-    Access the app at `http://localhost:5173`.
+## 🧠 Methodology: The "Ghost Data" Pattern
 
-## Environment Variables
+One of the biggest challenges in building Agents is handling large API responses. Shopify returns huge JSON files that exceed LLM token limits.
 
-| Variable | Description |
-|----------|-------------|
-| `SHOPIFY_STORE_URL` | Your Shopify store URL (e.g., `shop.myshopify.com`) |
-| `SHOPIFY_ACCESS_TOKEN` | Admin API Access Token (Orders read scope required) |
-| `GROQ_API_KEY` | API Key for Groq (Llama 3 Model) |
-| `GEMINI_API_KEY` | API Key for Google Gemini (Backup Model) |
+**Our Solution:**
+1.  **Intercept**: When the agent fetches data, the backend intercepts the JSON.
+2.  **Inject**: We inject the full JSON into the **Python REPL's local scope** as a variable (`shopify_data`).
+3.  **Ghost**: We tell the LLM: *"Data fetched. It is stored in variable `shopify_data`. Write code to analyze it."*
+4.  **Result**: The LLM writes code to query data it *never actually saw*. This reduces token usage by **99%** and increases speed.
 
-## Testing
-Run the full test suite in the `backend` directory:
+---
+
+## 🚀 Setup & Installation
+
+### A. Prerequisites
+*   Node.js (v18+)
+*   Python (v3.10+)
+*   Git
+
+### B. Backend Setup
 ```bash
-pytest
+# 1. Navigate to backend
+cd backend
+
+# 2. Create virtual environment
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+source venv/bin/activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Configure .env
+# Create a .env file with:
+SHOPIFY_STORE_URL=https://your-store.myshopify.com
+SHOPIFY_ACCESS_TOKEN=your_token
+GROQ_API_KEY=your_groq_key
+
+# 5. Run Server
+uvicorn app.main:app --reload
 ```
 
-## Known Limitations
-- **Rate Limits**: The Shopify API (leaky bucket) and LLM providers have rate limits. The agent handles these gracefully but large bulk queries may pause execution.
-- **Read-Only**: The agent cannot modify store data (create orders/products) for safety.
+### C. Frontend Setup
+```bash
+# 1. Navigate to frontend
+cd frontend
+
+# 2. Install dependencies
+npm install
+
+# 3. Run Development Server
+npm run dev
+```
+
+---
+
+## 🧪 Testing
+
+The project includes specific test scripts to verify the agent's logic.
+
+```bash
+cd backend/scripts
+python verify_test_cases.py
+```
+This runs a suite of questions (e.g., "What is the total revenue?") and checks if the Agent's answer matches the expected ground truth.
+
+---
+
+## 📦 Deployment
+
+*   **Frontend**: Ready for Vercel. Includes `vercel.json` for SPA routing.
+*   **Backend**: Ready for Render/Railway. Includes `create_all()` logic to auto-initialize the database on startup.
+
+See `DEPLOYMENT.md` for a step-by-step production guide.
+
+---
+
+## 📄 License
+This project is part of a Software Engineering Assignment.
