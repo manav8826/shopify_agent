@@ -12,6 +12,9 @@ An AI-powered analytics assistant for Shopify stores that uses natural language 
 }
 
 
+Video URL- https://www.loom.com/share/0ac1df7c61e74154b76b77c3bd9af5c7
+
+
 ---
 
 ## 🎯 **Overview**
